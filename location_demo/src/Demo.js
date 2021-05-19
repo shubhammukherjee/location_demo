@@ -1,54 +1,39 @@
-import React from "react";
-import { geolocated } from "react-geolocated";
+import React,{ useState } from "react";
+import { useEffect } from "react";
 import MyMapComponent from './MapComponent'
 
-class Demo extends React.Component {
-  state = {
-        lat : null,
-        long : null
-    }
+const Demo = (props) => {
+    const [lat , changeLat] = useState(null)
+    const [long , changeLong] = useState(null);
+    useEffect(() => {
 
-    componentDidUpdate(prevProps) {
-        if(prevProps.coords !== this.props.coords)
-        this.setState({
-            lat : this.props.coords.latitude,
-            long : this.props.coords.longitude
-        })
-    }
-
-    render() {
-        const {lat,long} = this.state
-        return !this.props.isGeolocationAvailable ? (
-            <div>Your browser does not support Geolocation</div>
-        ) : !this.props.isGeolocationEnabled ? (
-            <div>Geolocation is not enabled</div>
-        ) : this.props.coords ? (
+        if(!lat && !long ) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                console.log(position,"position")
+                changeLat(position.coords.latitude);
+                changeLong(position.coords.longitude)
+              });
+        }
+    })
+    return (
+        <div>
+        <div style={{display:'flex',justifyContent: 'space-evenly',marginBottom: '20px'}}>
             <div>
-            <div style={{display:'flex',justifyContent: 'space-evenly',marginBottom: '20px'}}>
-                <div>
-                <label>Latitude</label> <br/>
-                <input value={lat} onChange={(e) => this.setState({lat:e.target.value}) }/>
-                </div>
-                <div>
-                <label>Longitude</label> <br/>
-                <input value={long} onChange={(e) => this.setState({long:e.target.value}) }/>
-                </div>
-                </div>
-               
-                <MyMapComponent lat={this.state.lat} long={this.state.long} />
+            <label>Latitude</label> <br/>
+            <input value={lat} onChange={(e) => changeLat(e.target.value) }/>
             </div>
+            <div>
+            <label>Longitude</label> <br/>
+            <input value={long} onChange={(e) => changeLong(e.target.value) }/>
+            </div>
+            </div>
+           
+            <MyMapComponent lat={lat} long={long} />
+        </div>
 
-        ) : (
-            <div>Getting the location data&hellip; </div>
-        );
-    }
+    ) 
 }
 
-export default geolocated({
-    positionOptions: {
-        enableHighAccuracy: false,
-    },
-    userDecisionTimeout: 5000,
-})(Demo);
+ export default Demo;
 
 
